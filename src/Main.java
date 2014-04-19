@@ -19,6 +19,7 @@ public class Main
     static BufferedImage img = null;
     public static void main(String[] args)
     {
+        //Pick the image we want to draw
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
             "Image File", "png", "jpg", "jpeg", "bmp", "gif");
@@ -29,28 +30,20 @@ public class Main
             System.out.println("Bad file chosen");
             System.exit(1);
         }
-
         String pictureFilePath = chooser.getSelectedFile().getAbsolutePath();
         System.out.println("" + chooser.getSelectedFile().getAbsolutePath());
-
-
         try
         {
             img = ImageIO.read(new File(pictureFilePath));
         }
         catch (IOException e) {}
 
+        //Resize the image into a square
         BufferedImage newImg = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_ARGB);
         newImg.getGraphics().drawImage(img.getScaledInstance(SIZE, SIZE, Image.SCALE_DEFAULT),0,0,null);
         img = newImg;
 
-        Robot rob = null;
-        try
-        {
-           rob = new Robot();
-        }
-        catch (Exception e){}
-
+        //Convert the image to grayscale and find the average gray value
         int totalGrayscale = 0;
         for (int x = 0; x < img.getWidth(); x++)
         {
@@ -66,12 +59,28 @@ public class Main
                 totalGrayscale += grayscale;
             }
         }
-
         int averageGrayscale = totalGrayscale / (SIZE * SIZE);
 
+        //Initialize the robot and wait five seconds for the user to position the mouse
+        Robot rob = null;
+        try
+        {
+           rob = new Robot();
+        }
+        catch (Exception e){}
         rob.delay(5000);
-        Point cursorStart = MouseInfo.getPointerInfo().getLocation();
 
+        //Search the around the mouse pointer
+        Point cursorStart = MouseInfo.getPointerInfo().getLocation();
+        for (int x = 0; x < img.getWidth(); x+=3)
+        {
+            for (int y = 0; y < img.getHeight(); y+=3)
+            {
+                //NYI
+            }
+        }
+
+        //Draw the image
         for (int x = 0; x < img.getWidth(); x+=3)
         {
             for (int y = 0; y < img.getHeight(); y+=3)
@@ -84,11 +93,10 @@ public class Main
                     rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
                     //rob.delay(2);
                 }
-
-                //rob.delay(10);
             }
         }
 
+        //Display the image in a frame
         JFrame gui = new JFrame()
         {
             public void paint(Graphics g)
@@ -96,12 +104,13 @@ public class Main
                 g.drawImage(img, 0, 0, null);
             }
         };
-
         gui.setVisible(true);
         gui.setSize(SIZE, SIZE);
     }
+
     private static int colorToGrayscale(int color)
     {
+        //Use the eye's intensity for RGB to convert to grayscale
         int grayscale = 0;
         grayscale += ((0x00FF0000 & color) >> 16) * 0.3;
         grayscale += ((0x0000FF00 & color) >> 8)  * 0.59;
