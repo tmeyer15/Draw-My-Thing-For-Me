@@ -23,6 +23,23 @@ public class Main
     static BufferedImage img = null;
     public static void main(String[] args)
     {
+        /*
+        Robot robo = null;
+        try
+        {
+           robo = new Robot();
+        }
+        catch (Exception e){}
+
+        for(int asdf = 0; asdf < 100000; asdf++)
+        {
+
+            Point p = MouseInfo.getPointerInfo().getLocation();
+            System.out.println(robo.getPixelColor(p.x, p.y));
+
+            robo.delay(2000);
+        }*/
+
         //Pick the image we want to draw
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
@@ -44,19 +61,19 @@ public class Main
 
         //Create the set of colors that we will use
         HashSet<Color> expectedColors = new HashSet<Color>();
-        expectedColors.add(new Color(128,128,128));
-        expectedColors.add(new Color(  5,  5,  5));
-        //expectedColors.add(new Color(255,255,255));
-        expectedColors.add(new Color(231, 34, 27));
-        expectedColors.add(new Color( 77,204,  0));
+        expectedColors.add(new Color(109,109,109));
+        expectedColors.add(new Color(  7,  7,  7));
+        expectedColors.add(new Color(255,255,255));
+        expectedColors.add(new Color(222,  0, 22));
+        expectedColors.add(new Color( 67,199,  0));
         expectedColors.add(new Color(  0,  0,255));
-        expectedColors.add(new Color(171,197,255));
-        expectedColors.add(new Color(241,239,  0));
-        expectedColors.add(new Color(243,148,  0));
-        expectedColors.add(new Color( 99, 43,150));
-        expectedColors.add(new Color(233,181,246));
-        expectedColors.add(new Color(216,174,128));
-        expectedColors.add(new Color( 95, 57,  9));
+        expectedColors.add(new Color(155,182,255));
+        expectedColors.add(new Color(238,240,  0));
+        expectedColors.add(new Color(238,130,  0));
+        expectedColors.add(new Color( 79, 22,132));
+        expectedColors.add(new Color(226,161,244));
+        expectedColors.add(new Color(206,158,109));
+        expectedColors.add(new Color( 75, 43, 10));
 
         //Resize the image into a square
         BufferedImage newImg = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_ARGB);
@@ -121,8 +138,11 @@ public class Main
         System.out.println("Ending search, " + colorLocations.size());
 
         //Draw the image
+        Color prevColor = null;
         for (int x = 0; x < img.getWidth(); x+=3)
         {
+            rob.mousePress(InputEvent.BUTTON1_MASK);
+            rob.mouseRelease(InputEvent.BUTTON1_MASK);
             for (int y = 0; y < img.getHeight(); y+=3)
             {
                 /*
@@ -135,24 +155,32 @@ public class Main
                     //rob.delay(2);
                 }*/
                 Color nearestColor = getNearestColor(colorLocations.keySet(), new Color(img.getRGB(x, y)));
-                System.out.println("Color: " + nearestColor.toString());
-                if (nearestColor != null && !nearestColor.equals(Color.WHITE))
+                rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
+                if (nearestColor != null)
                 {
+                    if (!nearestColor.equals(prevColor))
+                    {
+                        rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
+                        rob.mouseRelease(InputEvent.BUTTON1_MASK);
 
-                    //Move mouse to color and select it
-                    Point colorPos = colorLocations.get(nearestColor);
-                    rob.mouseMove(colorPos.x, colorPos.y);
-                    rob.mousePress(InputEvent.BUTTON1_MASK);
-                    rob.mouseRelease(InputEvent.BUTTON1_MASK);
+                        //Move mouse to color and select it
+                        Point colorPos = colorLocations.get(nearestColor);
+                        rob.mouseMove(colorPos.x, colorPos.y);
+                        rob.mousePress(InputEvent.BUTTON1_MASK);
+                        rob.mouseRelease(InputEvent.BUTTON1_MASK);
+                        rob.delay(4);
 
-                    //Move mouse to where we are drawing and draw
-                    rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
-                    rob.mousePress(InputEvent.BUTTON1_MASK);
-                    rob.mouseRelease(InputEvent.BUTTON1_MASK);
+                        //Move mouse to where we are drawing and draw
+                        rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
+                        rob.mousePress(InputEvent.BUTTON1_MASK);
+                        rob.delay(4);
+
+                        prevColor = nearestColor;
+                    }
                 }
             }
         }
-
+        rob.mouseRelease(InputEvent.BUTTON1_MASK);
         //Display the image in a frame
         JFrame gui = new JFrame()
         {
@@ -195,5 +223,6 @@ public class Main
     private static double colorDistance(Color c1, Color c2)
     {
         return Math.sqrt( 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + 0.59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0));
+        //return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(),2.0) + Math.pow(c1.getGreen() - c2.getGreen(),2.0) + Math.pow(c1.getBlue() - c2.getBlue(),2.0));
     }
 }
