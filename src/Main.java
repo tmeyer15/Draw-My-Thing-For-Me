@@ -92,21 +92,6 @@ public class Main
         expectedColors.add(TAN);
         expectedColors.add(BROWN);
 
-        HashSet<Color> searchColors = new HashSet<Color>();
-        searchColors.add(GREY);
-        searchColors.add(BLACK);
-        searchColors.add(RED);
-        searchColors.add(GREEN);
-        searchColors.add(BLUE);
-        searchColors.add(LIGHTBLUE);
-        searchColors.add(YELLOW);
-        searchColors.add(ORANGE);
-        searchColors.add(PURPLE);
-        searchColors.add(PINK);
-        searchColors.add(TAN);
-        searchColors.add(BROWN);
-
-
         //Resize the image into a square
         BufferedImage newImg = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_ARGB);
         newImg.getGraphics().drawImage(img.getScaledInstance(SIZE, SIZE, Image.SCALE_DEFAULT),0,0,null);
@@ -140,7 +125,7 @@ public class Main
             for (int y = 0; y < height && colorLocations.size()<14; y+=YSEARCHWIDTH)
             {
                 Color col = rob.getPixelColor(x, y);
-                if (searchColors.contains(col))
+                if (expectedColors.contains(col))
                 {
                     int xi = x;
                     col = rob.getPixelColor(xi, y);
@@ -175,6 +160,13 @@ public class Main
                 }
 
             }
+        }
+
+        if (colorLocations.containsKey(RED) && colorLocations.containsKey(BLACK))
+        {
+        	Point redPoint = colorLocations.get(RED);
+        	Point blackPoint = colorLocations.get(BLACK);
+        	colorLocations.put(WHITE, new Point((redPoint.x+blackPoint.x)/2,(redPoint.y+blackPoint.y)/2));
         }
 
         System.out.println("Ending search, " + colorLocations.size());
