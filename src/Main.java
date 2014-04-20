@@ -1,3 +1,8 @@
+import javax.swing.JOptionPane;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.net.URLConnection;
+import java.net.URL;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +22,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Toolkit;
 import java.awt.Dimension;
+import org.json.*;
 
 public class Main
 {
@@ -87,6 +93,7 @@ public class Main
         }//*/ //This will stop all comment blocks
 
         //Pick the image we want to draw
+    	/*
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
             "Image File", "png", "jpg", "jpeg", "bmp", "gif");
@@ -99,11 +106,38 @@ public class Main
         }
         String pictureFilePath = chooser.getSelectedFile().getAbsolutePath();
         System.out.println("" + chooser.getSelectedFile().getAbsolutePath());
+
         try
         {
             img = ImageIO.read(new File(pictureFilePath));
         }
-        catch (IOException e) {}
+        catch (IOException e) {}*/
+
+    	try
+        {
+    	    String searchQuery =  JOptionPane.showInputDialog(null).replace(' ', '+');
+    	    URL url = new URL("https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" + searchQuery);
+            URLConnection connection = url.openConnection();
+
+            String line;
+            StringBuilder builder = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            while((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+
+            JSONObject json = new JSONObject(builder.toString());
+            String pictureURL = json.getJSONObject("responseData").getJSONArray("results").getJSONObject(0).getString("url");
+
+            img = ImageIO.read(new URL(pictureURL));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            System.out.println("SOMETHING WENT WRONG READING FROM GOOGLE!");
+        }
+
+
 
         //Create the set of colors that we will use
         HashSet<Color> expectedColors = new HashSet<Color>();
@@ -122,7 +156,9 @@ public class Main
         expectedColors.add(BROWN);
 
         //Resize the image into a square
-        BufferedImage newImg = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_ARGB);
+        double scaling = Math.min((double)SIZE / img.getHeight(), (double)SIZE / img.getWidth());
+        scaling = Math.min(1.0, scaling);
+        BufferedImage newImg = new BufferedImage((int)(scaling * img.getHeight()),(int)(scaling * img.getWidth()),BufferedImage.TYPE_INT_ARGB);
         newImg.getGraphics().drawImage(img.getScaledInstance(SIZE, SIZE, Image.SCALE_DEFAULT),0,0,null);
         img = newImg;
 
