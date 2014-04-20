@@ -80,7 +80,7 @@ public class Main
         HashSet<Color> expectedColors = new HashSet<Color>();
         expectedColors.add(GREY);
         expectedColors.add(BLACK);
-        expectedColors.add(WHITE);
+        //expectedColors.add(WHITE);
         expectedColors.add(RED);
         expectedColors.add(GREEN);
         expectedColors.add(BLUE);
@@ -91,6 +91,21 @@ public class Main
         expectedColors.add(PINK);
         expectedColors.add(TAN);
         expectedColors.add(BROWN);
+
+        HashSet<Color> searchColors = new HashSet<Color>();
+        searchColors.add(GREY);
+        searchColors.add(BLACK);
+        searchColors.add(RED);
+        searchColors.add(GREEN);
+        searchColors.add(BLUE);
+        searchColors.add(LIGHTBLUE);
+        searchColors.add(YELLOW);
+        searchColors.add(ORANGE);
+        searchColors.add(PURPLE);
+        searchColors.add(PINK);
+        searchColors.add(TAN);
+        searchColors.add(BROWN);
+
 
         //Resize the image into a square
         BufferedImage newImg = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_ARGB);
@@ -125,7 +140,7 @@ public class Main
             for (int y = 0; y < height && colorLocations.size()<14; y+=YSEARCHWIDTH)
             {
                 Color col = rob.getPixelColor(x, y);
-                if (expectedColors.contains(col))
+                if (searchColors.contains(col))
                 {
                     int xi = x;
                     col = rob.getPixelColor(xi, y);
@@ -163,46 +178,59 @@ public class Main
         }
 
         System.out.println("Ending search, " + colorLocations.size());
+        final int DELAY = 20;
 
         //Draw the image
-        Color prevColor = null;
         for (int x = 0; x < img.getWidth(); x+=3)
         {
             rob.mousePress(InputEvent.BUTTON1_MASK);
             rob.mouseRelease(InputEvent.BUTTON1_MASK);
-            for (int y = 0; y < img.getHeight(); y+=3)
+            rob.delay(DELAY);
+
+            Color[] columnColors = new Color[img.getHeight()];
+            for (int y = 0; y < img.getHeight(); y++)
             {
-                /*
-                int color = (0xFF & img.getRGB(x,y));
-                if (color < averageGrayscale)
+                Color nearestColor = getNearestColor(colorLocations.keySet(), new Color(img.getRGB(x, y)));
+                columnColors[y] = nearestColor;
+            }
+
+            for (int y = 0; y < img.getHeight(); y++)
+            {
+                if (y==0)
                 {
+                    //Move mouse to color and select it
+                    Point colorPos = colorLocations.get(columnColors[y]);
+                    rob.mouseMove(colorPos.x, colorPos.y);
                     rob.mousePress(InputEvent.BUTTON1_MASK);
                     rob.mouseRelease(InputEvent.BUTTON1_MASK);
+                    rob.delay(DELAY);
+
+                    //Move mouse to where we are drawing and draw
                     rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
-                    //rob.delay(2);
-                }*/
-                Color nearestColor = getNearestColor(colorLocations.keySet(), new Color(img.getRGB(x, y)));
-                rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
-                if (nearestColor != null)
+                    rob.mousePress(InputEvent.BUTTON1_MASK);
+                }
+                else
                 {
-                    if (!nearestColor.equals(prevColor))
+                    if (columnColors[y-1].equals(columnColors[y]))
                     {
                         rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
+                        rob.delay(DELAY);
+                    }
+                    else
+                    {
                         rob.mouseRelease(InputEvent.BUTTON1_MASK);
+                        rob.delay(DELAY);
 
                         //Move mouse to color and select it
-                        Point colorPos = colorLocations.get(nearestColor);
+                        Point colorPos = colorLocations.get(columnColors[y]);
                         rob.mouseMove(colorPos.x, colorPos.y);
                         rob.mousePress(InputEvent.BUTTON1_MASK);
                         rob.mouseRelease(InputEvent.BUTTON1_MASK);
-                        rob.delay(4);
+                        rob.delay(DELAY);
 
                         //Move mouse to where we are drawing and draw
                         rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
                         rob.mousePress(InputEvent.BUTTON1_MASK);
-                        rob.delay(4);
-
-                        prevColor = nearestColor;
                     }
                 }
             }
