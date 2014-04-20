@@ -292,7 +292,7 @@ public class Main
 
                         //Move mouse to where we are drawing and draw
                         rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
-                        rob.delay(DELAY);
+                        //rob.delay(DELAY);
                         rob.mousePress(InputEvent.BUTTON1_MASK);
                     }
                 }
