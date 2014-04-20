@@ -1,3 +1,8 @@
+import javax.swing.JOptionPane;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.net.URLConnection;
+import java.net.URL;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +22,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Toolkit;
 import java.awt.Dimension;
+import org.json.*;
 
 public class Main
 {
@@ -87,6 +93,7 @@ public class Main
         }//*/ //This will stop all comment blocks
 
         //Pick the image we want to draw
+    	/*
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
             "Image File", "png", "jpg", "jpeg", "bmp", "gif");
@@ -99,11 +106,38 @@ public class Main
         }
         String pictureFilePath = chooser.getSelectedFile().getAbsolutePath();
         System.out.println("" + chooser.getSelectedFile().getAbsolutePath());
+
         try
         {
             img = ImageIO.read(new File(pictureFilePath));
         }
-        catch (IOException e) {}
+        catch (IOException e) {}*/
+
+    	try
+        {
+    	    String searchQuery =  JOptionPane.showInputDialog(null).replace(' ', '+');
+    	    URL url = new URL("https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" + searchQuery);
+            URLConnection connection = url.openConnection();
+
+            String line;
+            StringBuilder builder = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            while((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+
+            JSONObject json = new JSONObject(builder.toString());
+            String pictureURL = json.getJSONObject("responseData").getJSONArray("results").getJSONObject(0).getString("url");
+
+            img = ImageIO.read(new URL(pictureURL));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            System.out.println("SOMETHING WENT WRONG READING FROM GOOGLE!");
+        }
+
+
 
         //Create the set of colors that we will use
         HashSet<Color> expectedColors = new HashSet<Color>();
@@ -122,7 +156,9 @@ public class Main
         expectedColors.add(BROWN);
 
         //Resize the image into a square
-        BufferedImage newImg = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_ARGB);
+        double scaling = Math.min((double)SIZE / img.getHeight(), (double)SIZE / img.getWidth());
+        scaling = Math.min(1.0, scaling);
+        BufferedImage newImg = new BufferedImage((int)(scaling * img.getHeight()),(int)(scaling * img.getWidth()),BufferedImage.TYPE_INT_ARGB);
         newImg.getGraphics().drawImage(img.getScaledInstance(SIZE, SIZE, Image.SCALE_DEFAULT),0,0,null);
         img = newImg;
 
@@ -246,6 +282,12 @@ public class Main
         	System.out.println("Color " + n + " has " + colorVector.length + " points.");
         	for (int m = 0; m < colorVector.length; m++)
         	{
+                Point breakoutMouse = MouseInfo.getPointerInfo().getLocation();
+                if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                {
+                    System.out.println("Quitting");
+                    return;
+                }
         		Point current = colorVector[m];
 
                 //Move mouse to where we are drawing and draw
@@ -256,12 +298,25 @@ public class Main
         		m++;
         		while (m < colorVector.length && Math.abs(current.x-colorVector[m].x)+Math.abs(current.y-colorVector[m].y)==1)
         		{
+
+                    breakoutMouse = MouseInfo.getPointerInfo().getLocation();
+                    if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                    {
+                        System.out.println("Quitting");
+                        return;
+                    }
         			current = colorVector[m];
 
                     rob.mouseMove(cursorStart.x + current.x, cursorStart.y + current.y);
                     rob.delay(DELAY);
         			while (m < colorVector.length && Math.abs(current.x-colorVector[m].x)==1 && current.y==colorVector[m].y)
         			{
+                        breakoutMouse = MouseInfo.getPointerInfo().getLocation();
+                        if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                        {
+                            System.out.println("Quitting");
+                            return;
+                        }
         				current = colorVector[m];
         				m++;
         			}
@@ -270,6 +325,12 @@ public class Main
                     rob.delay(DELAY);
         			while (m < colorVector.length && Math.abs(current.y-colorVector[m].y)==1 && current.x==colorVector[m].x)
         			{
+                        breakoutMouse = MouseInfo.getPointerInfo().getLocation();
+                        if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                        {
+                            System.out.println("Quitting");
+                            return;
+                        }
         				current = colorVector[m];
         				m++;
         			}
@@ -325,6 +386,7 @@ public class Main
 
     private static double colorDistance(Color c1, Color c2)
     {
+        /*
         double totalColor1_1 = Math.abs(c1.getRed() - c1.getGreen());
         double totalColor1_2 = Math.abs(c1.getGreen() - c1.getBlue());
         double totalColor1_3 = Math.abs(c1.getRed() - c1.getBlue());
@@ -333,8 +395,9 @@ public class Main
         double totalColor2_2 = Math.abs(c2.getGreen() - c2.getBlue());
         double totalColor2_3 = Math.abs(c2.getRed() - c2.getBlue());
 
-        double euclidean = 0.25 * Math.pow(totalColor1_1 - totalColor2_1, 2.0) + 0.25 * Math.pow(totalColor1_2 - totalColor2_2, 2.0) + 0.25 * Math.pow(totalColor1_3 - totalColor2_3, 2.0) + 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + .59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0);
-        return euclidean;
+        double euclidean = 0.2 * Math.pow(totalColor1_1 - totalColor2_1, 2.0) + 0.2 * Math.pow(totalColor1_2 - totalColor2_2, 2.0) + 0.2 * Math.pow(totalColor1_3 - totalColor2_3, 2.0) + 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + .59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0);
+        return euclidean;*/
         //return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(),2.0) + Math.pow(c1.getGreen() - c2.getGreen(),2.0) + Math.pow(c1.getBlue() - c2.getBlue(),2.0));
+        return 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + .59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0);
     }
 }
