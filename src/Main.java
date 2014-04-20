@@ -18,29 +18,59 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Toolkit;
 import java.awt.Dimension;
 
-
 public class Main
 {
     final static int SIZE = 200;
     static BufferedImage img = null;
 
-    final static Color GREY = new Color(109,109,109);
-    final static Color BLACK = new Color(  7,  7,  7);
-    final static Color WHITE = new Color(255,255,255);
-    final static Color RED = new Color(222,  0, 22);
-    final static Color GREEN = new Color( 67,199,  0);
-    final static Color BLUE = new Color(  0,  0,255);
-    final static Color LIGHTBLUE = new Color(155,182,255);
-    final static Color YELLOW = new Color(238,240,  0);
-    final static Color ORANGE = new Color(238,130,  0);
-    final static Color PURPLE = new Color( 79, 22,132);
-    final static Color PINK = new Color(226,161,244);
-    final static Color TAN = new Color(206,158,109);
-    final static Color BROWN = new Color( 75, 43, 10);
+	static Color GREY;
+	static Color BLACK;
+	static Color WHITE;
+	static Color RED;
+	static Color GREEN;
+	static Color BLUE;
+	static Color LIGHTBLUE;
+	static Color YELLOW;
+	static Color ORANGE;
+	static Color PURPLE;
+	static Color PINK;
+	static Color TAN;
+	static Color BROWN;
 
     public static void main(String[] args)
     {
-        /*
+    	if (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0)
+	    {
+		    GREY = new Color(109,109,109);
+		    BLACK = new Color(  7,  7,  7);
+		    WHITE = new Color(255,255,255);
+		    RED = new Color(222,  0, 22);
+		    GREEN = new Color( 67,199,  0);
+		    BLUE = new Color(  0,  0,255);
+		    LIGHTBLUE = new Color(155,182,255);
+		    YELLOW = new Color(238,240,  0);
+		    ORANGE = new Color(238,130,  0);
+		    PURPLE = new Color( 79, 22,132);
+		    PINK = new Color(226,161,244);
+		    TAN = new Color(206,158,109);
+		    BROWN = new Color( 75, 43, 10);
+		} else {
+			GREY = new Color(128,128,128);
+			BLACK = new Color(5,5,5);
+			WHITE = new Color(255,255,255);
+			RED = new Color(237,28,36);
+			GREEN = new Color(54,204,5);
+			BLUE = new Color(0,0,255);
+			LIGHTBLUE = new Color(170,198,255);
+			YELLOW = new Color(240,238,0);
+			ORANGE = new Color(247,147,30);
+			PURPLE = new Color(102,45,145);
+			PINK = new Color(236,181,242);
+			TAN = new Color(218,173,133);
+			BROWN = new Color(96,56,19);
+		}
+
+		/*// To use, add a '/' at the begining of the line.
         Robot robo = null;
         try
         {
@@ -55,7 +85,7 @@ public class Main
             System.out.println(robo.getPixelColor(p.x, p.y));
 
             robo.delay(2000);
-        }*/
+        }//*/ //This will stop all comment blocks
 
         //Pick the image we want to draw
         JFileChooser chooser = new JFileChooser();
