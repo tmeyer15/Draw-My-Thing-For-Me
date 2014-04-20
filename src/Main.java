@@ -15,6 +15,8 @@ import java.awt.image.BufferedImage;
 import java.awt.Image;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.Toolkit;
+import java.awt.Dimension;
 
 
 public class Main
@@ -114,24 +116,54 @@ public class Main
 
         System.out.println("Starting search");
 
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        final double width = screenSize.getWidth();
+        final double height = screenSize.getHeight();
+
         HashMap<Color, Point> colorLocations = new HashMap<Color, Point>();
         final int SEARCHSIZE = 400;
-        for (int x = -SEARCHSIZE; x < SEARCHSIZE; x+=4)
+        final int XSEARCHWIDTH = 120;
+        final int YSEARCHWIDTH = 20;
+        final int XCOLORWIDTH = 10;
+        for (int x = 0; x < width && colorLocations.size()<14; x+=XSEARCHWIDTH)
         {
-            for (int y = 0; y < SEARCHSIZE; y+=10)
+            for (int y = 0; y < height && colorLocations.size()<14; y+=YSEARCHWIDTH)
             {
-                Color col = rob.getPixelColor(cursorStart.x + x, cursorStart.y + y);
-                if (expectedColors.contains(col) && !colorLocations.containsKey(col))
+                Color col = rob.getPixelColor(x, y);
+                if (expectedColors.contains(col))
                 {
-                    Color colUp = rob.getPixelColor(cursorStart.x + x, cursorStart.y + y+1);
-                    Color colDown = rob.getPixelColor(cursorStart.x + x, cursorStart.y + y-1);
-                    Color colLeft = rob.getPixelColor(cursorStart.x + x-1, cursorStart.y + y);
-                    Color colRight = rob.getPixelColor(cursorStart.x + x+1, cursorStart.y + y);
-                    if (colUp.equals(col) && colDown.equals(col) && colLeft.equals(col) && colRight.equals(col) && !colorLocations.containsKey(col))
+                    int xi = x;
+                    col = rob.getPixelColor(xi, y);
+                    int missed = 0;
+                    while (missed<3)
                     {
-                        colorLocations.put(col, new Point(cursorStart.x + x, cursorStart.y + y));
+                        if (expectedColors.contains(col))
+                        {
+                            missed = 0;
+                            colorLocations.put(col, new Point(xi, y));
+                        } else {
+                            missed++;
+                        }
+                        xi-=XCOLORWIDTH;
+                        col = rob.getPixelColor(xi, y);
+                    }
+                    xi = x;
+                    col = rob.getPixelColor(xi, y);
+                    missed = 0;
+                    while (missed<3)
+                    {
+                        if (expectedColors.contains(col))
+                        {
+                            missed = 0;
+                            colorLocations.put(col, new Point(xi, y));
+                        } else {
+                            missed++;
+                        }
+                        xi+=XCOLORWIDTH;
+                        col = rob.getPixelColor(xi, y);
                     }
                 }
+
             }
         }
 
