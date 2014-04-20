@@ -245,6 +245,12 @@ public class Main
                         Point colorPos = colorLocations.get(columnColors[x][y]);
                         rob.mouseMove(colorPos.x, colorPos.y);
                         rob.delay(DELAY);
+                        Point breakoutMouse = MouseInfo.getPointerInfo().getLocation();
+                        if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                        {
+                            System.out.println("Quitting");
+                            return;
+                        }
                         rob.mousePress(InputEvent.BUTTON1_MASK);
                         rob.mouseRelease(InputEvent.BUTTON1_MASK);
 
@@ -299,6 +305,7 @@ public class Main
 
     private static double colorDistance(Color c1, Color c2)
     {
+        /*
         double totalColor1_1 = Math.abs(c1.getRed() - c1.getGreen());
         double totalColor1_2 = Math.abs(c1.getGreen() - c1.getBlue());
         double totalColor1_3 = Math.abs(c1.getRed() - c1.getBlue());
@@ -307,8 +314,9 @@ public class Main
         double totalColor2_2 = Math.abs(c2.getGreen() - c2.getBlue());
         double totalColor2_3 = Math.abs(c2.getRed() - c2.getBlue());
 
-        double euclidean = 0.25 * Math.pow(totalColor1_1 - totalColor2_1, 2.0) + 0.25 * Math.pow(totalColor1_2 - totalColor2_2, 2.0) + 0.25 * Math.pow(totalColor1_3 - totalColor2_3, 2.0) + 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + .59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0);
-        return euclidean;
+        double euclidean = 0.2 * Math.pow(totalColor1_1 - totalColor2_1, 2.0) + 0.2 * Math.pow(totalColor1_2 - totalColor2_2, 2.0) + 0.2 * Math.pow(totalColor1_3 - totalColor2_3, 2.0) + 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + .59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0);
+        return euclidean;*/
         //return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(),2.0) + Math.pow(c1.getGreen() - c2.getGreen(),2.0) + Math.pow(c1.getBlue() - c2.getBlue(),2.0));
+        return 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + .59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0);
     }
 }
