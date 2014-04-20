@@ -211,52 +211,78 @@ public class Main
         }
 
         final int DELAY = 40;
-        //Draw the image
+        //Scan the image
+        HashMap<Color, HashSet<Point>> colorVectors = new HashMap<Color, HashSet<Point>>(15);
         for (int x = 0; x < img.getWidth(); x+=3)
         {
             rob.mouseRelease(InputEvent.BUTTON1_MASK);
 
             for (int y = 0; y < img.getHeight(); y+=3)
             {
-                if (y==0)
-                {
-                    //Move mouse to color and select it
-                    Point colorPos = colorLocations.get(columnColors[x][y]);
-                    rob.mouseMove(colorPos.x, colorPos.y);
-                    rob.delay(DELAY);
-                    rob.mousePress(InputEvent.BUTTON1_MASK);
-                    rob.mouseRelease(InputEvent.BUTTON1_MASK);
-
-
-                    //Move mouse to where we are drawing and draw
-                    rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
-                    rob.delay(DELAY);
-                    rob.mousePress(InputEvent.BUTTON1_MASK);
-                }
-                else
-                {
-                    if (!columnColors[x][y-3].equals(columnColors[x][y]) || y > img.getHeight() - 3)
-                    {
-                        rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
-                        rob.delay(DELAY);
-                        rob.mouseRelease(InputEvent.BUTTON1_MASK);
-
-                        //Move mouse to color and select it
-                        Point colorPos = colorLocations.get(columnColors[x][y]);
-                        rob.mouseMove(colorPos.x, colorPos.y);
-                        rob.delay(DELAY);
-                        rob.mousePress(InputEvent.BUTTON1_MASK);
-                        rob.mouseRelease(InputEvent.BUTTON1_MASK);
-
-                        //Move mouse to where we are drawing and draw
-                        rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
-                        rob.delay(DELAY);
-                        rob.mousePress(InputEvent.BUTTON1_MASK);
-                    }
-                }
+            	if (!colorVectors.containsKey(columnColors[x][y]))
+            	{
+            		colorVectors.put(columnColors[x][y],new HashSet<Point>());
+            	}
+            	colorVectors.get(columnColors[x][y]).add(new Point(x,y));
             }
         }
         rob.mouseRelease(InputEvent.BUTTON1_MASK);
+
+        //Draw my thing!
+        Object[] colorsInPicture = colorVectors.keySet().toArray();
+
+        System.out.println("" + colorsInPicture.length + " colors in picture.");
+        for (int n = 0; n < colorsInPicture.length; n++)
+        {
+            //Move mouse to color and select it
+            Point colorPos = colorLocations.get((Color) colorsInPicture[n]);
+            rob.mouseMove(colorPos.x, colorPos.y);
+            rob.delay(DELAY);
+            rob.mousePress(InputEvent.BUTTON1_MASK);
+            rob.mouseRelease(InputEvent.BUTTON1_MASK);
+
+        	HashSet<Point> pointSet = colorVectors.get((Color) colorsInPicture[n]);
+        	Point[] colorVector = pointSet.toArray(new Point[pointSet.size()]);
+        	System.out.println("Color " + n + " has " + colorVector.length + " points.");
+        	for (int m = 0; m < colorVector.length; m++)
+        	{
+        		Point current = colorVector[m];
+
+                //Move mouse to where we are drawing and draw
+                rob.mouseMove(cursorStart.x + current.x, cursorStart.y + current.y);
+                rob.delay(DELAY);
+                rob.mousePress(InputEvent.BUTTON1_MASK);
+
+        		m++;
+        		while (m < colorVector.length && Math.abs(current.x-colorVector[m].x)+Math.abs(current.y-colorVector[m].y)==1)
+        		{
+        			current = colorVector[m];
+
+                    rob.mouseMove(cursorStart.x + current.x, cursorStart.y + current.y);
+                    rob.delay(DELAY);
+        			while (m < colorVector.length && Math.abs(current.x-colorVector[m].x)==1 && current.y==colorVector[m].y)
+        			{
+        				current = colorVector[m];
+        				m++;
+        			}
+
+                    rob.mouseMove(cursorStart.x + current.x, cursorStart.y + current.y);
+                    rob.delay(DELAY);
+        			while (m < colorVector.length && Math.abs(current.y-colorVector[m].y)==1 && current.x==colorVector[m].x)
+        			{
+        				current = colorVector[m];
+        				m++;
+        			}
+
+                    rob.mouseMove(cursorStart.x + current.x, cursorStart.y + current.y);
+                    rob.delay(DELAY);
+        		}
+        		m--;
+
+                rob.mouseRelease(InputEvent.BUTTON1_MASK);
+        	}
+        }
+
 
         //Display the image in a frame
         JFrame gui = new JFrame()
