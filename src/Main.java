@@ -24,19 +24,19 @@ public class Main
     final static int SIZE = 200;
     static BufferedImage img = null;
 
-    final static Color GREY = new Color(109,109,109);
-    final static Color BLACK = new Color(  7,  7,  7);
-    final static Color WHITE = new Color(255,255,255);
-    final static Color RED = new Color(222,  0, 22);
-    final static Color GREEN = new Color( 67,199,  0);
-    final static Color BLUE = new Color(  0,  0,255);
-    final static Color LIGHTBLUE = new Color(155,182,255);
-    final static Color YELLOW = new Color(238,240,  0);
-    final static Color ORANGE = new Color(238,130,  0);
-    final static Color PURPLE = new Color( 79, 22,132);
-    final static Color PINK = new Color(226,161,244);
-    final static Color TAN = new Color(206,158,109);
-    final static Color BROWN = new Color( 75, 43, 10);
+    final static Color GREY =       new Color(109,109,109);
+    final static Color BLACK =      new Color(  7,  7,  7);
+    final static Color WHITE =      new Color(255,255,255);
+    final static Color RED =        new Color(222,  0, 22);
+    final static Color GREEN =      new Color( 67,199,  0);
+    final static Color BLUE =       new Color(  0,  0,255);
+    final static Color LIGHTBLUE =  new Color(155,182,255);
+    final static Color YELLOW =     new Color(238,240,  0);
+    final static Color ORANGE =     new Color(238,130,  0);
+    final static Color PURPLE =     new Color( 79, 22,132);
+    final static Color PINK =       new Color(226,161,244);
+    final static Color TAN =        new Color(206,158,109);
+    final static Color BROWN =      new Color( 75, 43, 10);
 
     public static void main(String[] args)
     {
@@ -48,10 +48,10 @@ public class Main
         }
         catch (Exception e){}
 
-        for(int asdf = 0; asdf < 100000; asdf++)
+        for(int asdf = 0; asdf < 10; asdf++)
         {
 
-            Point p = MouseInfo.getPointerInfo().getLocation();
+            //Point p = MouseInfo.getPointerInfo().getLocation();
             System.out.println(robo.getPixelColor(p.x, p.y));
 
             robo.delay(2000);
@@ -119,7 +119,7 @@ public class Main
         final int SEARCHSIZE = 400;
         final int XSEARCHWIDTH = 120;
         final int YSEARCHWIDTH = 20;
-        final int XCOLORWIDTH = 10;
+        final int XCOLORWIDTH = 8;
         for (int x = 0; x < width && colorLocations.size()<14; x+=XSEARCHWIDTH)
         {
             for (int y = 0; y < height && colorLocations.size()<14; y+=YSEARCHWIDTH)
@@ -170,58 +170,58 @@ public class Main
         }
 
         System.out.println("Ending search, " + colorLocations.size());
-        final int DELAY = 20;
 
-        //Draw the image
-        for (int x = 0; x < img.getWidth(); x+=3)
+        Color[][] columnColors = new Color[img.getWidth()][img.getHeight()];
+        for (int x = 0; x < img.getWidth(); x++)
         {
-            rob.mousePress(InputEvent.BUTTON1_MASK);
-            rob.mouseRelease(InputEvent.BUTTON1_MASK);
-            rob.delay(DELAY);
-
-            Color[] columnColors = new Color[img.getHeight()];
             for (int y = 0; y < img.getHeight(); y++)
             {
                 Color nearestColor = getNearestColor(colorLocations.keySet(), new Color(img.getRGB(x, y)));
-                columnColors[y] = nearestColor;
+                columnColors[x][y] = nearestColor;
             }
+        }
 
-            for (int y = 0; y < img.getHeight(); y++)
+        final int DELAY = 40;
+        //Draw the image
+        for (int x = 0; x < img.getWidth(); x+=3)
+        {
+            rob.mouseRelease(InputEvent.BUTTON1_MASK);
+
+            for (int y = 0; y < img.getHeight(); y+=3)
             {
                 if (y==0)
                 {
                     //Move mouse to color and select it
-                    Point colorPos = colorLocations.get(columnColors[y]);
+                    Point colorPos = colorLocations.get(columnColors[x][y]);
                     rob.mouseMove(colorPos.x, colorPos.y);
+                    rob.delay(DELAY);
                     rob.mousePress(InputEvent.BUTTON1_MASK);
                     rob.mouseRelease(InputEvent.BUTTON1_MASK);
-                    rob.delay(DELAY);
+
 
                     //Move mouse to where we are drawing and draw
                     rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
+                    rob.delay(DELAY);
                     rob.mousePress(InputEvent.BUTTON1_MASK);
                 }
                 else
                 {
-                    if (columnColors[y-1].equals(columnColors[y]))
+                    if (!columnColors[x][y-3].equals(columnColors[x][y]) || y > img.getHeight() - 3)
                     {
                         rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
                         rob.delay(DELAY);
-                    }
-                    else
-                    {
                         rob.mouseRelease(InputEvent.BUTTON1_MASK);
-                        rob.delay(DELAY);
 
                         //Move mouse to color and select it
-                        Point colorPos = colorLocations.get(columnColors[y]);
+                        Point colorPos = colorLocations.get(columnColors[x][y]);
                         rob.mouseMove(colorPos.x, colorPos.y);
+                        rob.delay(DELAY);
                         rob.mousePress(InputEvent.BUTTON1_MASK);
                         rob.mouseRelease(InputEvent.BUTTON1_MASK);
-                        rob.delay(DELAY);
 
                         //Move mouse to where we are drawing and draw
                         rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
+                        rob.delay(DELAY);
                         rob.mousePress(InputEvent.BUTTON1_MASK);
                     }
                 }
@@ -270,7 +270,10 @@ public class Main
 
     private static double colorDistance(Color c1, Color c2)
     {
-        return Math.sqrt( 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + 0.59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0));
+        double totalColor1 = c1.getRed() + c1.getGreen() + c1.getBlue();
+        double totalColor2 = c1.getRed() + c1.getGreen() + c1.getBlue();
+        double euclidean = Math.pow(totalColor1 - totalColor2, 2.0) + 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + .59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0);
+        return euclidean;
         //return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(),2.0) + Math.pow(c1.getGreen() - c2.getGreen(),2.0) + Math.pow(c1.getBlue() - c2.getBlue(),2.0));
     }
 }
