@@ -1,3 +1,7 @@
+import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.MouseInfo;
 import java.awt.event.InputEvent;
@@ -38,11 +42,28 @@ public class Main
         }
         catch (IOException e) {}
 
+        //Create the set of colors that we will use
+        HashSet<Color> expectedColors = new HashSet<Color>();
+        expectedColors.add(new Color(128,128,128));
+        expectedColors.add(new Color(  5,  5,  5));
+        //expectedColors.add(new Color(255,255,255));
+        expectedColors.add(new Color(231, 34, 27));
+        expectedColors.add(new Color( 77,204,  0));
+        expectedColors.add(new Color(  0,  0,255));
+        expectedColors.add(new Color(171,197,255));
+        expectedColors.add(new Color(241,239,  0));
+        expectedColors.add(new Color(243,148,  0));
+        expectedColors.add(new Color( 99, 43,150));
+        expectedColors.add(new Color(233,181,246));
+        expectedColors.add(new Color(216,174,128));
+        expectedColors.add(new Color( 95, 57,  9));
+
         //Resize the image into a square
         BufferedImage newImg = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_ARGB);
         newImg.getGraphics().drawImage(img.getScaledInstance(SIZE, SIZE, Image.SCALE_DEFAULT),0,0,null);
         img = newImg;
 
+        /*
         //Convert the image to grayscale and find the average gray value
         int totalGrayscale = 0;
         for (int x = 0; x < img.getWidth(); x++)
@@ -60,6 +81,7 @@ public class Main
             }
         }
         int averageGrayscale = totalGrayscale / (SIZE * SIZE);
+        */
 
         //Initialize the robot and wait five seconds for the user to position the mouse
         Robot rob = null;
@@ -70,21 +92,40 @@ public class Main
         catch (Exception e){}
         rob.delay(5000);
 
-        //Search the around the mouse pointer
+        //Search the around the mouse pointer for the colors
         Point cursorStart = MouseInfo.getPointerInfo().getLocation();
-        for (int x = 0; x < img.getWidth(); x+=3)
+
+        System.out.println("Starting search");
+
+        HashMap<Color, Point> colorLocations = new HashMap<Color, Point>();
+        final int SEARCHSIZE = 400;
+        for (int x = -SEARCHSIZE; x < SEARCHSIZE; x+=4)
         {
-            for (int y = 0; y < img.getHeight(); y+=3)
+            for (int y = 0; y < SEARCHSIZE; y+=10)
             {
-                //NYI
+                Color col = rob.getPixelColor(cursorStart.x + x, cursorStart.y + y);
+                if (expectedColors.contains(col) && !colorLocations.containsKey(col))
+                {
+                    Color colUp = rob.getPixelColor(cursorStart.x + x, cursorStart.y + y+1);
+                    Color colDown = rob.getPixelColor(cursorStart.x + x, cursorStart.y + y-1);
+                    Color colLeft = rob.getPixelColor(cursorStart.x + x-1, cursorStart.y + y);
+                    Color colRight = rob.getPixelColor(cursorStart.x + x+1, cursorStart.y + y);
+                    if (colUp.equals(col) && colDown.equals(col) && colLeft.equals(col) && colRight.equals(col) && !colorLocations.containsKey(col))
+                    {
+                        colorLocations.put(col, new Point(cursorStart.x + x, cursorStart.y + y));
+                    }
+                }
             }
         }
+
+        System.out.println("Ending search, " + colorLocations.size());
 
         //Draw the image
         for (int x = 0; x < img.getWidth(); x+=3)
         {
             for (int y = 0; y < img.getHeight(); y+=3)
             {
+                /*
                 int color = (0xFF & img.getRGB(x,y));
                 if (color < averageGrayscale)
                 {
@@ -92,6 +133,22 @@ public class Main
                     rob.mouseRelease(InputEvent.BUTTON1_MASK);
                     rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
                     //rob.delay(2);
+                }*/
+                Color nearestColor = getNearestColor(colorLocations.keySet(), new Color(img.getRGB(x, y)));
+                System.out.println("Color: " + nearestColor.toString());
+                if (nearestColor != null && !nearestColor.equals(Color.WHITE))
+                {
+
+                    //Move mouse to color and select it
+                    Point colorPos = colorLocations.get(nearestColor);
+                    rob.mouseMove(colorPos.x, colorPos.y);
+                    rob.mousePress(InputEvent.BUTTON1_MASK);
+                    rob.mouseRelease(InputEvent.BUTTON1_MASK);
+
+                    //Move mouse to where we are drawing and draw
+                    rob.mouseMove(cursorStart.x + x, cursorStart.y + y);
+                    rob.mousePress(InputEvent.BUTTON1_MASK);
+                    rob.mouseRelease(InputEvent.BUTTON1_MASK);
                 }
             }
         }
@@ -116,5 +173,27 @@ public class Main
         grayscale += ((0x0000FF00 & color) >> 8)  * 0.59;
         grayscale += ((0x000000FF & color) >> 0)  * 0.11;
         return grayscale;
+    }
+
+    private static Color getNearestColor(Set<Color> colors, Color color)
+    {
+        //returns the color in the set that is closest to the color
+        Color closestColor = null;
+        double closestDistance = Double.MAX_VALUE;
+        for (Color c: colors)
+        {
+            double dist = colorDistance(c, color);
+            if (dist < closestDistance)
+            {
+                closestColor = c;
+                closestDistance = dist;
+            }
+        }
+        return closestColor;
+    }
+
+    private static double colorDistance(Color c1, Color c2)
+    {
+        return Math.sqrt( 0.3 * Math.pow(c1.getRed() - c2.getRed(),2.0) + 0.59 * Math.pow(c1.getGreen() - c2.getGreen(),2.0) + 0.11 * Math.pow(c1.getBlue() - c2.getBlue(),2.0));
     }
 }
