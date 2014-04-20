@@ -23,6 +23,21 @@ public class Main
 {
     final static int SIZE = 200;
     static BufferedImage img = null;
+
+    final static Color GREY = new Color(109,109,109);
+    final static Color BLACK = new Color(  7,  7,  7);
+    final static Color WHITE = new Color(255,255,255);
+    final static Color RED = new Color(222,  0, 22);
+    final static Color GREEN = new Color( 67,199,  0);
+    final static Color BLUE = new Color(  0,  0,255);
+    final static Color LIGHTBLUE = new Color(155,182,255);
+    final static Color YELLOW = new Color(238,240,  0);
+    final static Color ORANGE = new Color(238,130,  0);
+    final static Color PURPLE = new Color( 79, 22,132);
+    final static Color PINK = new Color(226,161,244);
+    final static Color TAN = new Color(206,158,109);
+    final static Color BROWN = new Color( 75, 43, 10);
+
     public static void main(String[] args)
     {
         /*
@@ -63,44 +78,24 @@ public class Main
 
         //Create the set of colors that we will use
         HashSet<Color> expectedColors = new HashSet<Color>();
-        expectedColors.add(new Color(109,109,109));
-        expectedColors.add(new Color(  7,  7,  7));
-        expectedColors.add(new Color(255,255,255));
-        expectedColors.add(new Color(222,  0, 22));
-        expectedColors.add(new Color( 67,199,  0));
-        expectedColors.add(new Color(  0,  0,255));
-        expectedColors.add(new Color(155,182,255));
-        expectedColors.add(new Color(238,240,  0));
-        expectedColors.add(new Color(238,130,  0));
-        expectedColors.add(new Color( 79, 22,132));
-        expectedColors.add(new Color(226,161,244));
-        expectedColors.add(new Color(206,158,109));
-        expectedColors.add(new Color( 75, 43, 10));
+        expectedColors.add(GREY);
+        expectedColors.add(BLACK);
+        expectedColors.add(WHITE);
+        expectedColors.add(RED);
+        expectedColors.add(GREEN);
+        expectedColors.add(BLUE);
+        expectedColors.add(LIGHTBLUE);
+        expectedColors.add(YELLOW);
+        expectedColors.add(ORANGE);
+        expectedColors.add(PURPLE);
+        expectedColors.add(PINK);
+        expectedColors.add(TAN);
+        expectedColors.add(BROWN);
 
         //Resize the image into a square
         BufferedImage newImg = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_ARGB);
         newImg.getGraphics().drawImage(img.getScaledInstance(SIZE, SIZE, Image.SCALE_DEFAULT),0,0,null);
         img = newImg;
-
-        /*
-        //Convert the image to grayscale and find the average gray value
-        int totalGrayscale = 0;
-        for (int x = 0; x < img.getWidth(); x++)
-        {
-            for (int y = 0; y < img.getHeight(); y++)
-            {
-                int rawColor = img.getRGB(x, y);
-                int grayscale = colorToGrayscale(rawColor);
-                int newColor = 0xFF;
-                newColor = (newColor << 8) | grayscale;
-                newColor = (newColor << 8) | grayscale;
-                newColor = (newColor << 8) | grayscale;
-                img.setRGB(x, y, newColor);
-                totalGrayscale += grayscale;
-            }
-        }
-        int averageGrayscale = totalGrayscale / (SIZE * SIZE);
-        */
 
         //Initialize the robot and wait five seconds for the user to position the mouse
         Robot rob = null;
@@ -213,6 +208,7 @@ public class Main
             }
         }
         rob.mouseRelease(InputEvent.BUTTON1_MASK);
+
         //Display the image in a frame
         JFrame gui = new JFrame()
         {
