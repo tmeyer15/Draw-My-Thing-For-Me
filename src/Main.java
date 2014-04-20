@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.MouseInfo;
@@ -248,7 +249,7 @@ public class Main
 
         final int DELAY = 40;
         //Scan the image
-        HashMap<Color, HashSet<Point>> colorVectors = new HashMap<Color, HashSet<Point>>(15);
+        HashMap<Color, LinkedHashSet<Point>> colorVectors = new HashMap<Color, LinkedHashSet<Point>>(15);
         for (int x = 0; x < img.getWidth(); x+=3)
         {
             rob.mouseRelease(InputEvent.BUTTON1_MASK);
@@ -257,7 +258,7 @@ public class Main
             {
             	if (!colorVectors.containsKey(columnColors[x][y]))
             	{
-            		colorVectors.put(columnColors[x][y],new HashSet<Point>());
+            		colorVectors.put(columnColors[x][y],new LinkedHashSet<Point>());
             	}
             	colorVectors.get(columnColors[x][y]).add(new Point(x,y));
             }
@@ -277,18 +278,20 @@ public class Main
             rob.mousePress(InputEvent.BUTTON1_MASK);
             rob.mouseRelease(InputEvent.BUTTON1_MASK);
 
-        	HashSet<Point> pointSet = colorVectors.get((Color) colorsInPicture[n]);
+        	LinkedHashSet<Point> pointSet = colorVectors.get((Color) colorsInPicture[n]);
         	Point[] colorVector = pointSet.toArray(new Point[pointSet.size()]);
         	System.out.println("Color " + n + " has " + colorVector.length + " points.");
+
+        	Point current = new Point(colorPos.x - cursorStart.x, colorPos.y - cursorStart.y);
         	for (int m = 0; m < colorVector.length; m++)
         	{
                 Point breakoutMouse = MouseInfo.getPointerInfo().getLocation();
-                if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                if (breakoutMouse.x != cursorStart.x + current.x || breakoutMouse.y != cursorStart.y + current.y)
                 {
                     System.out.println("Quitting");
                     return;
                 }
-        		Point current = colorVector[m];
+        		current = colorVector[m];
 
                 //Move mouse to where we are drawing and draw
                 rob.mouseMove(cursorStart.x + current.x, cursorStart.y + current.y);
@@ -300,7 +303,7 @@ public class Main
         		{
 
                     breakoutMouse = MouseInfo.getPointerInfo().getLocation();
-                    if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                    if (breakoutMouse.x != cursorStart.x + current.x || breakoutMouse.y != cursorStart.y + current.y)
                     {
                         System.out.println("Quitting");
                         return;
@@ -312,7 +315,7 @@ public class Main
         			while (m < colorVector.length && Math.abs(current.x-colorVector[m].x)==1 && current.y==colorVector[m].y)
         			{
                         breakoutMouse = MouseInfo.getPointerInfo().getLocation();
-                        if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                        if (breakoutMouse.x != cursorStart.x + current.x || breakoutMouse.y != cursorStart.y + current.y)
                         {
                             System.out.println("Quitting");
                             return;
@@ -326,7 +329,7 @@ public class Main
         			while (m < colorVector.length && Math.abs(current.y-colorVector[m].y)==1 && current.x==colorVector[m].x)
         			{
                         breakoutMouse = MouseInfo.getPointerInfo().getLocation();
-                        if (breakoutMouse.x != colorPos.x || breakoutMouse.y != colorPos.y)
+                        if (breakoutMouse.x != cursorStart.x + current.x || breakoutMouse.y != cursorStart.y + current.y)
                         {
                             System.out.println("Quitting");
                             return;
