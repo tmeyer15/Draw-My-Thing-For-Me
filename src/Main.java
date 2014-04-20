@@ -80,7 +80,7 @@ public class Main
         HashSet<Color> expectedColors = new HashSet<Color>();
         expectedColors.add(GREY);
         expectedColors.add(BLACK);
-        expectedColors.add(WHITE);
+        //expectedColors.add(WHITE); //DO NOT ADD UNTIL AFTER SEARCH
         expectedColors.add(RED);
         expectedColors.add(GREEN);
         expectedColors.add(BLUE);
@@ -160,6 +160,11 @@ public class Main
                 }
 
             }
+        }
+        if colorLocations.contains(RED) && colorLocations.contains(BLACK) {
+        	Point redPoint = colorLocations.get(RED);
+        	Point blackPoint = colorLocations.get(BLACK);
+        	colorLocations.put(WHITE,Point((redPoint.x+blackPoint.x)/2,(redPoint.y+blackPoint.y)/2))
         }
 
         System.out.println("Ending search, " + colorLocations.size());
